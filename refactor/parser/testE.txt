@@ -1,0 +1,9 @@
+OneSamp Test File E: wrong number of genes.
+geneA
+geneB
+geneC
+geneD
+Pop
+indivFoo ,0505 0606 0708 5594
+indivBar, 525165 256525 5442 3523
+indivBaz ,066545 525354 4323 6524

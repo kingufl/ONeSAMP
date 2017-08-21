@@ -1,0 +1,12 @@
+OneSamp Test File D: blank line.
+geneA
+geneB
+geneC
+Pop
+indivFoo ,0404 0202 0302
+indivBar, 0104 0101 0303
+
+
+
+
+indivBaz ,0101 0202 0303

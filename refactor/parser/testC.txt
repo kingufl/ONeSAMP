@@ -1,0 +1,8 @@
+OneSamp Test File C: syntax error.
+geneA
+geneB
+geneC
+Pop
+indivFoo ,0505 0606 0708
+indivBar, 525165 256525 5442
+indivBaz ,066545 5253545 4323

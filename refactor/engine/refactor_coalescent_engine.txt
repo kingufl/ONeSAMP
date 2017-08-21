@@ -1,0 +1,89 @@
+    int locus_index;
+    double theta = parseTheta(i);
+    int ic; // Initial conditions
+    int nlin; // Number of lineages
+    int num_genes = 4 * parseBottleneck(i); // FIXME make work for microsats
+    int minAlleleCount = (int) ceil(parseMinAlleleFrequency() * num_genes);
+    double totalAllelePr = 0;
+
+    // Memo table to store coalescent frequency distribution probabilities
+    double *coalescentProbabilityMemoTable = (double *)malloc((num_genes / 2 - minAlleleCount + 1) * sizeof(double));
+
+    // j denotes the number of extra genes beyond the minimum number of mutations
+    int j;
+    for(j = 0; j <= num_genes / 2 - minAlleleCount; j++){
+      coalescentProbabilityMemoTable[j] = allelePr(j + minAlleleCount, num_genes - j - minAlleleCount, theta);
+      totalAllelePr += coalescentProbabilityMemoTable[j];
+    }
+    for(j = 0; j <= num_genes / 2 - minAlleleCount; j++){
+      coalescentProbabilityMemoTable[j] /= totalAllelePr;
+    }
+    ALLELE_TYPE *gvec = (ALLELE_TYPE *)malloc(num_genes*sizeof(ALLELE_TYPE));
+    for(locus_index = 0; locus_index < extraProportionOfBufferLoci * parseNLoci(); locus_index++) {
+//      gvec[0] = parseFormFlag() == 0 ? 2 * randBit() + randBit() + 1 : 200;
+//      gvec[1] = parseFormFlag() == 0 ? 2 * randBit() + randBit() + 1 : 200;
+//      nlin = 2;
+//      while(1){
+//        ic = disrand(0,nlin-1);
+//        if(branchWithProbability(theta / (theta + nlin - 1))){
+          // If mutation occurs, assigns to branch ic.
+          // Use the appropriate mutation model.
+//          parseFormFlag() == 0 ? mutateSNP(gvec + ic) : mutateMicroSat(gvec + ic);
+//        }
+//        else {
+//          if(nlin == num_genes) break;
+//          gvec[nlin] = gvec[ic];
+//          ++nlin;
+//        }
+//      }
+
+      // Generate distribution of genes from coalescent
+
+      // Pick one genotype
+      int base1 = parseFormFlag() == 0 ? 2 * randBit() + randBit() + 1 : initializeMicrosat1(locus_index);
+      // Pick a different genotype
+      int base2 = parseFormFlag() == 0 ? (base1 + disrand(0, 2)) % 4 + 1 : initializeMicrosat2(locus_index);
+
+      // Simulate coalescent frequency distribution
+      double cut = gfsr4();
+      for(j = 0; j <= num_genes / 2 - minAlleleCount; j++){
+        cut -= coalescentProbabilityMemoTable[j];
+        if(cut < 0) break;
+      }
+      // j now contains frequency of mutant allele
+
+      // Fill genotype array with this frequency distribution
+      int count2;
+      for(count2 = 0; count2 < num_genes; count2++){
+        if(count2 < j + minAlleleCount) gvec[count2] = base1; else gvec[count2] = base2;
+      }
+      int numleft = num_genes;
+
+      // Distribute the genes into the genome vectors with a random permutation.
+      for(j = 0; j < parseBottleneck(i); j++){
+        ic = disrand(0,numleft-1);
+        females[0][j].pgtype[locus_index] = gvec[ic];
+        gvec[ic] = gvec[numleft-1];
+        --numleft;
+      }
+      for(j = 0; j < parseBottleneck(i); j++){
+        ic = disrand(0,numleft-1);
+        females[0][j].mgtype[locus_index] = gvec[ic];
+        gvec[ic] = gvec[numleft-1];
+        --numleft;
+      }
+      for(j = 0; j < parseBottleneck(i); j++){
+        ic = disrand(0,numleft-1);
+        males[0][j].pgtype[locus_index] = gvec[ic];
+        gvec[ic] = gvec[numleft-1];
+        --numleft;
+      }
+      for(j = 0; j < parseBottleneck(i); j++){
+        ic = disrand(0,numleft-1);
+        males[0][j].mgtype[locus_index] = gvec[ic];
+        gvec[ic] = gvec[numleft-1];
+       --numleft;
+      }
+    }
+    free(gvec);
+    free(coalescentProbabilityMemoTable);

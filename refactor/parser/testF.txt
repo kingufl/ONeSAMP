@@ -1,0 +1,8 @@
+OneSamp Test File F: Pop is nonstandard.
+geneA
+geneB
+geneC
+poP
+indivFoo ,0404 0202 0302
+indivBar, 0104 0101 0303
+indivBaz ,0101 0202 0303
